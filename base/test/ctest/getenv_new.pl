@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Digest::MD5 qw(md5_hex);
 
 my $board_name = `cat /sys/class/dmi/id/board_name | tr -d '\n'`;
 my $board_serial = `cat /sys/class/dmi/id/board_serial | tr -d '\n'`;
@@ -13,6 +14,10 @@ my $product_uuid = `cat /sys/class/dmi/id/product_uuid | tr -d '\n'`;
 
 my $output = "board_name:$board_name,board_serial:$board_serial,board_vendor:$board_vendor,product_name:$product_name,product_version:$product_version,product_serial:$product_serial,product_uuid:$product_uuid";
 
+my $md5_output = substr(md5_hex($output), 0, 8);
+
+$output = $output . ",md5:$md5_output";
+
 open(my $fh, '>', 'license_env.txt');
-print $fh "$output";
+print $fh "$output\n";
 close $fh;
