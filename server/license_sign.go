@@ -94,6 +94,10 @@ func LicenseSign(c *gin.Context) {
 		return
 	}
 
+	if req.UseDongle != "true" && req.UseDongle != "false" {
+		req.UseDongle = "true"
+	}
+
 	// Wait for a token from the semaphore
 	if err := sem.Acquire(context.Background(), 1); err != nil {
 		klog.Errorf("Failed to acquire semaphore: %v", err)
@@ -108,7 +112,7 @@ func LicenseSign(c *gin.Context) {
 
 	// Run external program
 	//env := req.LicenseEnv + `\0`
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("./signTools/license_sign \"%s\" \"%s\" %d", req.LicenseEnv, req.LicenseTag, req.LicenseDeadline))
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("./signTools/license_sign \"%s\" \"%s\" %d \"%s\"", req.LicenseEnv, req.LicenseTag, req.LicenseDeadline, req.UseDongle))
 	sem.Release(1)
 	//打印命令
 	klog.Infof("Running command with arguments: %v, %v, %v", req.LicenseEnv, req.LicenseTag, strconv.Itoa(req.LicenseDeadline))

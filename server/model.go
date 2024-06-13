@@ -4,6 +4,7 @@ type LicenseSignRequest struct {
 	LicenseEnv      string `json:"license_env" form:"license_env" `
 	LicenseTag      string `json:"license_tag" form:"license_tag" `
 	LicenseDeadline int    `json:"license_deadline" form:"license_deadline" `
+	UseDongle       string `json:"use_dongle" form:"use_dongle" ` //true or false
 	// LicenseEnvMD5   *string `json:"license_env_md5" form:"license_env_md5" `
 }
 
