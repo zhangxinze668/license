@@ -89,7 +89,7 @@ func LicenseSign(c *gin.Context) {
 			Code:      "InvalidParameter",
 			Message:   "licenseDeadline is not valid",
 			RequestId: "",
-			Data:      "Please check your licenseDeadline, it should not be 0",
+			Data:      "Please check your licenseDeadline, it should not be empty",
 		})
 		return
 	}
@@ -112,7 +112,12 @@ func LicenseSign(c *gin.Context) {
 
 	// Run external program
 	//env := req.LicenseEnv + `\0`
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("./signTools/license_sign \"%s\" \"%s\" %d \"%s\"", req.LicenseEnv, req.LicenseTag, req.LicenseDeadline, req.UseDongle))
+	var cmd *exec.Cmd
+	if req.UseDongle == "false" {
+		cmd = exec.Command("bash", "-c", fmt.Sprintf("./signTools/license_sign \"%s\" \"%s\" %d \"%s\"", req.LicenseEnv, req.LicenseTag, req.LicenseDeadline, req.UseDongle))
+	}else{
+		cmd = exec.Command("bash", "-c", fmt.Sprintf("./signTools/license_sign \"%s\" \"%s\" %d ", req.LicenseEnv, req.LicenseTag, req.LicenseDeadline))
+	}
 	sem.Release(1)
 	//打印命令
 	klog.Infof("Running command with arguments: %v, %v, %v", req.LicenseEnv, req.LicenseTag, strconv.Itoa(req.LicenseDeadline))
