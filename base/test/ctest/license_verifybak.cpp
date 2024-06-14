@@ -261,10 +261,15 @@ __attribute__((always_inline)) inline void check_license(const std::filesystem::
 
     std::string data = license_decode.substr(0, license_decode.find_last_of('|'));
     std::istringstream ss(license_decode);
-    std::string license_tag, license_env, license_endtime, license_signature;
+    std::string license_tag, license_env, license_endtime, use_dongle, license_signature;
+
     std::getline(ss, license_tag, '|');
     std::getline(ss, license_env, '|');
     std::getline(ss, license_endtime, '|');
+    if (std::count(license_decode.begin(), license_decode.end(), '|') == 4) {
+        std::getline(ss, use_dongle, '|');
+    }
+    // std::getline(ss, use_dongle, '|');
     std::getline(ss, license_signature, '|');
 
     // check license signature
@@ -280,7 +285,7 @@ __attribute__((always_inline)) inline void check_license(const std::filesystem::
     time_t now = 0;
     // std::cout << "LICENSE_ADMIN_PWD: " << (license_admin_pwd ? license_admin_pwd : "NULL") << std::endl;
     // std::cout << "LICENSE_ADMIN: " << LICENSE_ADMIN << std::endl;
-    if (license_admin_pwd && std::string(license_admin_pwd) == (LICENSE_ADMIN)) {
+    if ((license_admin_pwd && std::string(license_admin_pwd) == (LICENSE_ADMIN)) || use_dongle == "false") {
         now = time(0);
     } else {
         DWORD dwRet = 0;
@@ -388,8 +393,8 @@ __attribute__((always_inline)) inline void check_license(const std::filesystem::
         }
     }
     printf("Now time: %ld\n", now);
-    printf("License Expire time: %ld\n", std::stol(license_endtime));
-    if (now > std::stoi(license_endtime)) {
+    printf("License Expire time: %ld\n", std::stoll(license_endtime));
+    if (now > std::stoll(license_endtime)) {
         throw std::runtime_error("license is expired!");
     }
 

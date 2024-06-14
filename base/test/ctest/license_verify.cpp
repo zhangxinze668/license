@@ -245,13 +245,19 @@ int main(int argc, char *argv[]) {
     std::string license_data = aesDecrypt(ciphertext, key, iv);
     std::cout << "license_data: " << license_data << std::endl;
     license_decode = license_data;
+    // 如果license_decode包含"use_donlge",则按5个|分割，否则按4个|分割
     std::string data = license_decode.substr(0, license_decode.find_last_of('|'));
     // 根据两个;分成三段;data;signature;data为license_env和license_endtime的组合
     std::istringstream ss(license_decode);
-    std::string license_tag, license_env, license_endtime, license_signature;
+    std::string license_tag, license_env, license_endtime, use_dongle, license_signature;
+
     std::getline(ss, license_tag, '|');
     std::getline(ss, license_env, '|');
     std::getline(ss, license_endtime, '|');
+    if (std::count(license_decode.begin(), license_decode.end(), '|') == 4) {
+        std::getline(ss, use_dongle, '|');
+    }
+    // std::getline(ss, use_dongle, '|');
     std::getline(ss, license_signature, '|');
 
     // std::string license_tag = license_decode.substr(0,
@@ -266,6 +272,7 @@ int main(int argc, char *argv[]) {
     std::cout << "license_tag: " << license_tag << std::endl;
     std::cout << "license_env: " << license_env << std::endl;
     std::cout << "license_endtime: " << license_endtime << std::endl;
+    std::cout << "use_dongle: " << use_dongle << std::endl;
     std::cout << "license_signature: " << license_signature << std::endl;
 
     // 判断license signature是否正确
@@ -280,12 +287,12 @@ int main(int argc, char *argv[]) {
     time_t now = time(0);
     tm *ltm = localtime(&now);
     // std::cout << "now: " << now << std::endl;
-    if (now > std::stoi(license_endtime)) {
+    if (now > std::stoll(license_endtime)) {
         throw std::runtime_error("license is expired!");
     }
 
     // 判断license_tag是否正确
-    std::string license_tag_str = "lghmhizl";
+    std::string license_tag_str = "test";
     if (license_tag == license_tag_str) {
         std::cout << "license_tag is valid!\n";
     } else {

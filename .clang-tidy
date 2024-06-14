@@ -1,1 +1,3 @@
-Checks: 'cppcoreguidelines-*,modernize-*,performance-*'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,bugprone-*,concurrency-*,performance-*' 
+# Checks: 'clang-diagnostic-*,clang-analyzer-*,bugprone-*,concurrency-*,performance-*,portability-*,readability-*,cppcoreguidelines-*,modernize-*,' 
+HeaderFilterRegex: '.*'

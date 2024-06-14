@@ -10,6 +10,7 @@
 #include <openssl/sha.h>
 #include <sstream>
 #include <vector>
+#include <fstream>
 
 std::string vectorToHexString(const std::vector<unsigned char> &data) {
     std::ostringstream oss;
@@ -137,27 +138,47 @@ std::string base64Encode(const std::string &data) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <license_tag>" << std::endl;
-        return 1;
+    // if (argc != 5) {
+    //     std::cerr << "Usage: " << argv[0] << " <license_tag>" << std::endl;
+    //     return 1;
+    // }
+    // std::string license_envstr = argv[1];
+    // // std::cout << "license_envstr: " << license_envstr << std::endl;
+    // std::string license_tag = argv[2];
+    // // std::cout << "license_tag: " << license_tag << std::endl;
+    // int license_days = std::stoi(argv[3]);
+    // // std::cout << "license_days: " << license_days << std::endl;
+    // std::string use_dongle = argv[4];
+    //
+    // std::cout << "use_dongle: " << use_dongle << std::endl;
+
+    std::string filePath = "./license_env.txt";
+    std::ifstream license_env(filePath);
+    if (!license_env.is_open()) {
+        throw std::runtime_error("license_env.txt is not exist!");
     }
-    std::string license_envstr = argv[1];
-    // std::cout << "license_envstr: " << license_envstr << std::endl;
-    std::string license_tag = argv[2];
-    // std::cout << "license_tag: " << license_tag << std::endl;
-    int license_days = std::stoi(argv[3]);
-    // std::cout << "license_days: " << license_days << std::endl;
-    //  std::string filePath = "./license_env.txt";
-    //  std::ifstream license_env(filePath);
-    //  if (!license_env.is_open()){
-    //      throw std::runtime_error("license_env.txt is not exist!");
-    //  }
-    //  std::ostringstream buf;
-    //  buf << license_env.rdbuf();
-    //  std::string license_envstr = buf.str();
-    //  license_envstr = license_envstr.substr(0,
-    //  license_envstr.find_last_of('\\')); std::cout << "license_env: " <<
-    //  license_envstr << std::endl;
+    std::ostringstream buf;
+    buf << license_env.rdbuf();
+    std::string license_envstr = buf.str();
+    license_envstr = license_envstr.substr(0,
+                                           license_envstr.find_last_of('\\'));
+    std::cout << "license_env: " << license_envstr << std::endl;
+
+    // 从终端输入license_tag
+    std::cout << "please input license_tag: ";
+    std::string license_tag;
+    std::cin >> license_tag;
+    std::cout << "license_tag: " << license_tag << std::endl;
+    // 从终端输入天数，这里存储为license_days,默认为365天
+    std::cout << "please input license_days: ";
+    int license_days;
+    std::cin >> license_days;
+    std::string license_days_str = std::to_string(license_days);
+    // 获取是否使用加密狗
+    std::cout << "please input use_dongle: ";
+    std::string use_dongle;
+    std::cin >> use_dongle;
+    std::cout << "use_dongle: " << use_dongle << std::endl;
 
     // 获取当前时间+天数得到过期时间
     time_t now = time(0);
@@ -171,7 +192,7 @@ int main(int argc, char *argv[]) {
     // std::cout << "end_time_str: " << end_time_str << std::endl;
     // 将license_env和end_time_str拼接，得到license_str
     std::string license_str =
-        license_tag + "|" + license_envstr + "|" + end_time_str;
+        license_tag + "|" + license_envstr + "|" + end_time_str + "|" + use_dongle;
     // std::cout << "license_str: " << license_str << std::endl;
 
     // 获取私钥,计算签名
@@ -192,15 +213,15 @@ int main(int argc, char *argv[]) {
     std::vector<unsigned char> iv = hexToBytes(iv_hex);
     std::vector<unsigned char> ciphertext = aesEncrypt(license, key, iv);
     std::string ciphertext_str = vectorToHexString(ciphertext);
-    // std::cout << "ciphertext_str: " << ciphertext_str << std::endl;
+    std::cout << "ciphertext_str: " << ciphertext_str << std::endl;
     // base64编码
     std::string encodedLicense = base64Encode(ciphertext_str);
-    // std::ofstream license_file("./license.txt");
-    // license_file << encodedLicense;
-    // license_file.close();
+    std::ofstream license_file("./license.txt");
+    license_file << encodedLicense;
+    license_file.close();
 
     // 如何使得输出最后一行不换行
-    std::cout << encodedLicense;
+    // std::cout << encodedLicense;
 
     return 0;
 }
